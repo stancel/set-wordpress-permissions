@@ -1,0 +1,22 @@
+---
+# vars file for set-wordpress-permissions
+
+# The key here us to set the proper variables based on whether or now you are using a list
+
+
+#####     Optional Variables      #####
+
+# Will you be passing a list of databases and/or database users to setup?
+#set_wordpress_permissions_certs_use_list: false
+
+# The document root for the webserver
+#set_wordpress_permissions_web_home: "/var/www"
+# The name of the folder created under each website folder that holds the files webserver will serve up.
+#set_wordpress_permissions_subfolder_used_to_serve_files: "www"
+
+# Structure for a list, showing only the *required* fields
+#set_wordpress_permissions_setup_sites_to_set_up:
+#  - {
+#      name: 'investmentappraiser',
+#      site_subfolder_used_to_serve_files: "www"
+#    }

@@ -1,0 +1,270 @@
+---
+# tasks file for set_wordpress_permissions
+
+# These address permissions but assume that the ownership of files and directories 
+# are already correct.
+# *** Might want to create role that also sets the ownership correctly.***
+# Then that role and this one can be called by an automated cron job every few hours to help security issues.
+
+## Had trouble running WP Update until I chown'd the WP directory to www-data:www-data
+##  Great Link: https://www.smashingmagazine.com/2014/05/proper-wordpress-filesystem-permissions-ownerships/
+##
+## Permissions should be:
+##                     664 for files
+##                      - sudo find . -type f -exec chmod 664 {} +
+##                     775 for directories
+##                      - sudo find . -type d -exec chmod 775 {} +
+##                     660 for wp-config 
+##                      - sudo chmod 660 wp-config.php
+##
+#sudo chmod 660 wp-config.php
+
+- name: "Only passing individual values"
+  block:
+
+    # The 2 at the beginning makes the directory SGID (Set Group ID). 
+    # That means any files in the directory automatically will inherit the group of the folder, as opposed to the group of the user putting the file there.
+    # The group of this folder should already be set to the webserver's group - www-data
+    - name: "Ensure directories are 2755"
+      command: find {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/ -type d -exec chmod -c 2755 {} \;
+      register: chmod_result
+      changed_when: "chmod_result.stdout != \"\""
+      with_items: '{{ nginx_site_setup_sites_to_set_up }}'
+
+    # The 2 at the beginning makes the directory SGID (Set Group ID). 
+    # That means any files in the directory automatically will inherit the group of the folder, as opposed to the group of the user putting the file there.
+    # The group of this folder should already be set to the webserver's group - www-data
+    - name: "Ensure files are 0644"
+      command: find {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/ -type f -exec chmod -c 0644 {} \;
+      register: chmod_result
+      changed_when: "chmod_result.stdout != \"\""
+      with_items: '{{ nginx_site_setup_sites_to_set_up }}'
+
+    # Check for STANDARD WordPress installations
+
+    - name: Check for wordpress
+      stat: path={{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-config.php
+      register: has_wordpress
+
+    - name: "Debugging Value of has_wordpress variable"
+      debug:
+        msg: "The value of has_wordpress is: {{ has_wordpress }}"
+
+    # Set permissions for a STANDARD WordPress Installation that are found
+
+    - name: Set wp-content permissions
+      command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content
+      when: has_wordpress.stat.exists
+
+    # It may need 660 for wp-config.php
+    - name: Set wp-config.php permissions
+      command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-config.php
+      when: has_wordpress.stat.exists
+
+    - name: "Set wp-content/themes permissions"
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/themes
+      when: has_wordpress.stat.exists
+
+    - name: Set wp-content/plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/plugins
+      when: has_wordpress.stat.exists
+
+    - name: Set wp-content/mu-plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/mu-plugins
+      when: has_wordpress.stat.exists
+
+    - name: Set wp-content/uploads permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/uploads
+      when: has_wordpress.stat.exists
+
+    - name: Set wp-content/upgrade permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/upgrade
+      when: has_wordpress.stat.exists
+      ignore_errors: yes
+      
+    - name: Set wp-content/cache permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/cache
+      when: has_wordpress.stat.exists
+      ignore_errors: yes
+
+    # Check for Bedrock WordPress installations
+
+    - name: Check for wordpress
+      stat: path={{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp-config.php
+      register: has_bedrock_wordpress
+
+    # Set permissions for a BedRock WordPress Installation that are found
+
+    - name: Set web/app permissions
+      command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app
+      when: has_bedrock_wordpress.stat.exists
+
+    # It may need 660 for wp-config.php
+    - name: Set wp-config.php permissions
+      command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp-config.php
+      when: has_bedrock_wordpress.stat.exists
+
+    - name: Set web/wp/wp-content permissions - for good measure
+      command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp/wp-content
+      when: has_bedrock_wordpress.stat.exists
+
+    - name: Set web/app/themes permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/themes
+      when: has_bedrock_wordpress.stat.exists
+
+    - name: Set web/app/plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/plugins
+      when: has_bedrock_wordpress.stat.exists
+
+    - name: Set web/app/mu-plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/mu-plugins
+      when: has_bedrock_wordpress.stat.exists
+
+    - name: Set web/app/uploads permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/uploads
+      when: has_bedrock_wordpress.stat.exists
+
+    - name: Set web/app/upgrade permissions - for good measure
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/upgrade
+      when: has_bedrock_wordpress.stat.exists
+      ignore_errors: yes
+
+    - name: Set web/app/cache permissions - for good measure
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/cache
+      when: has_bedrock_wordpress.stat.exists
+      ignore_errors: yes
+      
+  when: not set_wordpress_permissions_certs_use_list
+
+ 
+- name: "Passing a list of of values"
+  block:
+  
+    # The 2 at the beginning makes the directory SGID (Set Group ID). 
+    # That means any files in the directory automatically will inherit the group of the folder, as opposed to the group of the user putting the file there.
+    # The group of this folder should already be set to the webserver's group - www-data
+    - name: "Ensure directories are 2755"
+      command: find {{ set_wordpress_permissions_web_home }}/{{ item.name }}/{{ item.site_subfolder_used_to_serve_files }}/ -type d -exec chmod -c 2755 {} \;
+      register: chmod_result
+      changed_when: "chmod_result.stdout != \"\""
+      with_items: '{{ set_wordpress_permissions_setup_sites_to_set_up }}'
+
+    # The 2 at the beginning makes the directory SGID (Set Group ID). 
+    # That means any files in the directory automatically will inherit the group of the folder, as opposed to the group of the user putting the file there.
+    # The group of this folder should already be set to the webserver's group - www-data
+    - name: "Ensure files are 0644"
+      command: find {{ set_wordpress_permissions_web_home }}/{{ item.name }}/{{ item.site_subfolder_used_to_serve_files }}/ -type f -exec chmod -c 0644 {} \;
+      register: chmod_result
+      changed_when: "chmod_result.stdout != \"\""
+      with_items: '{{ set_wordpress_permissions_setup_sites_to_set_up }}'
+
+
+    # Check for STANDARD WordPress installations
+
+    - name: Check for wordpress
+      stat: path={{ set_wordpress_permissions_web_home }}/{{ item.name }}/{{ item.site_subfolder_used_to_serve_files }}/wp-config.php
+      register: has_wordpress
+      with_items: '{{ set_wordpress_permissions_setup_sites_to_set_up }}'
+
+    # Set permissions for a STANDARD WordPress Installation that are found
+
+    - name: Set wp-content permissions
+      command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-config.php
+    - name: Set wp-config.php permissions
+      command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-config.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-content/themes permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/themes
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-content/plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/plugins
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-content/mu-plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/mu-plugins
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-content/uploads permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/uploads
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-content/upgrade permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/upgrade
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-content/cache permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/cache
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+      ignore_errors: yes
+
+    # Check for Bedrock WordPress installations
+
+    - name: Check for wordpress
+      stat: path={{ set_wordpress_permissions_web_home }}/{{ item.name }}/{{ item.site_subfolder_used_to_serve_files }}/web/wp-config.php
+      register: has_bedrock_wordpress
+      with_items: '{{ set_wordpress_permissions_setup_sites_to_set_up }}'
+
+    # Set permissions for a BedRock WordPress Installation that are found
+
+    - name: Set web/app permissions
+      command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-config.php
+    - name: Set wp-config.php permissions
+      command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/wp-config.php
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set web/wp/wp-content permissions - for good measure
+      command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/wp/wp-content
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set web/app/themes permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/themes
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set web/app/plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/plugins
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set web/app/mu-plugins permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/mu-plugins
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set web/app/uploads permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/uploads
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set web/app/upgrade permissions - for good measure
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/upgrade
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+      ignore_errors: yes
+
+    - name: Set web/app/cache permissions - for good measure
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/cache
+      with_items: '{{ has_bedrock_wordpress.results }}'
+      when: item.stat.exists
+      ignore_errors: yes
+
+  when: set_wordpress_permissions_certs_use_list

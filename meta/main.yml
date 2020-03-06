@@ -1,0 +1,32 @@
+galaxy_info:
+  author: "Brad Stancel"
+  description: "This role aims to help with reduce the chances of some script kiddie getting access to yours or your clients' WordPress sites by properly setting the Linux file permissions"
+  company: YourOnlineDept.com
+
+  license: GPLv3
+
+  min_ansible_version: 2.4
+
+  github_branch: master
+  
+  platforms:
+  - name: Ubuntu
+    versions:
+    - eoan
+    - xenial
+    - bionic
+  - name: Debian
+    versions:
+    - buster
+    - stretch
+    - jessie
+    - wheezy
+
+  galaxy_tags: 
+    - nginx
+    - wordpress
+    - Wordpress
+    - vhost
+    - permissions
+
+dependencies: []
