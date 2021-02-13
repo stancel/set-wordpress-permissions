@@ -61,6 +61,11 @@
       command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-config.php
       when: has_wordpress.stat.exists
 
+    - name: Set wp-includes/update-core.php permissions
+      command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-includes/update-core.php
+      with_items: '{{ has_wordpress.results }}'
+      when: has_wordpress.exists
+
     - name: "Set wp-content/themes permissions"
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/themes
       when: has_wordpress.stat.exists
@@ -103,6 +108,11 @@
     - name: Set wp-config.php permissions
       command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp-config.php
       when: has_bedrock_wordpress.stat.exists
+
+    - name: Set wp-includes/update-core.php permissions
+      command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp-admin/includes/update-core.php
+      with_items: '{{ has_wordpress.results }}'
+      when: has_bedrock_wordpress.exists
 
     - name: Set web/wp/wp-content permissions - for good measure
       command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp/wp-content
@@ -166,6 +176,12 @@
       register: has_wordpress
       with_items: '{{ set_wordpress_permissions_setup_sites_to_set_up }}'
 
+    # Check for WordPress update-core.php file
+    - name: Check for wordpress wp-admin/includes/update-core.php file
+      stat: path={{ set_wordpress_permissions_web_home }}/{{ item.name }}/{{ item.site_subfolder_used_to_serve_files }}/wp-admin/includes/update-core.php
+      register: has_update_core_file
+      with_items: '{{ set_wordpress_permissions_setup_sites_to_set_up }}'
+
     # Set permissions for a STANDARD WordPress Installation that are found
 
     - name: Set wp-content permissions
@@ -176,6 +192,171 @@
     # It may need 660 for wp-config.php
     - name: Set wp-config.php permissions
       command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-config.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for xmlrpc.php
+    - name: Set xmlrpc.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/xmlrpc.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-blog-header.php
+    - name: Set wp-blog-header.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-blog-header.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+      # It may need 660 for readme.html
+    - name: Set readme.html permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/readme.html
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-signup.php
+    - name: Set wp-signup.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-signup.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for index.php
+    - name: Set index.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/index.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-cron.php
+    - name: Set wp-cron.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-cron.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-config-sample.php
+    - name: Set wp-config-sample.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-config-sample.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-login.php
+    - name: Set wp-login.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-login.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-settings.php
+    - name: Set wp-settings.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-settings.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for license.txt
+    - name: Set license.txt permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/license.txt
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-mail.php
+    - name: Set wp-mail.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-mail.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-links-opml.php
+    - name: Set wp-links-opml.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-links-opml.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-load.php
+    - name: Set wp-load.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-load.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-activate.php
+    - name: Set wp-activate.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-activate.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-trackback.php
+    - name: Set wp-trackback.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-trackback.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # It may need 660 for wp-comments-post.php
+    - name: Set wp-comments-post.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-comments-post.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+
+    - name: Set wp-admin permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    # update-core.php 
+    - name: Set wp-admin/includes/update-core.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/includes/update-core.php
+      with_items: '{{ has_update_core_file.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/about.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/about.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/edit-tag-form.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/edit-tag-form.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/media-new.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/media-new.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/comment.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/comment.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/edit-tag-form.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/edit-tag-form.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists            
+
+    - name: Set wp-admin/admin-header.php permissions
+      command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/admin-header.php
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists     
+
+
+    - name: Set wp-admin/includes permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/includes
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/images permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/images
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+
+    - name: Set wp-admin/network permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/network
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-admin/js permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/js
+      with_items: '{{ has_wordpress.results }}'
+      when: item.stat.exists
+
+    - name: Set wp-includes permissions
+      command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-includes
       with_items: '{{ has_wordpress.results }}'
       when: item.stat.exists
 
