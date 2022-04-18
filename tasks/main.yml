@@ -63,8 +63,8 @@
 
     - name: Set wp-includes/update-core.php permissions
       command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-includes/update-core.php
-      with_items: '{{ has_wordpress.results }}'
       when: has_wordpress.exists
+      ignore_errors: yes
 
     - name: "Set wp-content/themes permissions"
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/themes
@@ -77,6 +77,7 @@
     - name: Set wp-content/mu-plugins permissions
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/mu-plugins
       when: has_wordpress.stat.exists
+      ignore_errors: yes
 
     - name: Set wp-content/uploads permissions
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/wp-content/uploads
@@ -113,6 +114,7 @@
       command: chmod 640 {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp-admin/includes/update-core.php
       with_items: '{{ has_wordpress.results }}'
       when: has_bedrock_wordpress.exists
+      ignore_errors: yes
 
     - name: Set web/wp/wp-content permissions - for good measure
       command: chmod g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/wp/wp-content
@@ -129,6 +131,7 @@
     - name: Set web/app/mu-plugins permissions
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/mu-plugins
       when: has_bedrock_wordpress.stat.exists
+      ignore_errors: yes
 
     - name: Set web/app/uploads permissions
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ set_wordpress_permissions_subfolder_used_to_serve_files }}/web/app/uploads
@@ -266,24 +269,28 @@
       command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-links-opml.php
       with_items: '{{ has_wordpress.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     # It may need 660 for wp-load.php
     - name: Set wp-load.php permissions
       command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-load.php
       with_items: '{{ has_wordpress.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     # It may need 660 for wp-activate.php
     - name: Set wp-activate.php permissions
       command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-activate.php
       with_items: '{{ has_wordpress.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     # It may need 660 for wp-trackback.php
     - name: Set wp-trackback.php permissions
       command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-trackback.php
       with_items: '{{ has_wordpress.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     # It may need 660 for wp-comments-post.php
     - name: Set wp-comments-post.php permissions
@@ -302,6 +309,7 @@
       command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/includes/update-core.php
       with_items: '{{ has_update_core_file.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     - name: Set wp-admin/about.php permissions
       command: chmod 660 {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-admin/about.php
@@ -374,6 +382,7 @@
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/mu-plugins
       with_items: '{{ has_wordpress.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     - name: Set wp-content/uploads permissions
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/wp-content/uploads
@@ -430,6 +439,7 @@
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/mu-plugins
       with_items: '{{ has_bedrock_wordpress.results }}'
       when: item.stat.exists
+      ignore_errors: yes
 
     - name: Set web/app/uploads permissions
       command: chmod -R g+w {{ set_wordpress_permissions_web_home }}/{{ item.item.name }}/{{ item.item.site_subfolder_used_to_serve_files }}/web/app/uploads
